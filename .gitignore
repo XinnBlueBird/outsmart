@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+demo-assets/node_modules/
+demo-assets/raw/
+demo-assets/outsmart-demo.mp4
+

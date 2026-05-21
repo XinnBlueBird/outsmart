@@ -6,7 +6,7 @@ import AIThinking from "@/components/AIThinking";
 import { useGameEngine } from "@/lib/game-engine";
 import { Handshake, Send } from "lucide-react";
 
-const SYSTEM_PROMPT = `You are MiMo, an advanced AI playing a negotiation and strategy game against a human.
+const SYSTEM_PROMPT = `You are MiMo, an advanced AI playing a NEGOTIATION BATTLE against a human. Both have HP. Good deals deal damage to you. Bad deals hurt the player.
 
 GAME RULES:
 - This is a resource negotiation game with hidden objectives
@@ -28,10 +28,12 @@ BLUFFING ELEMENTS:
 - If the human calls your bluff correctly, bonus points [SCORE: 5]
 - If they fall for a trap, [SCORE: 0]
 
+Be fierce and strategic. Reference the player's HP and character in your negotiations.
+
 Start round 1 with a compelling negotiation scenario. Be direct, no greeting.`;
 
 export default function NegotiateArena() {
-  const { state, startGame, sendMove, resetGame } = useGameEngine(SYSTEM_PROMPT, 5);
+  const { state, selectCharacter, useAbility, sendMove, resetGame } = useGameEngine(SYSTEM_PROMPT, 5);
   const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,13 +46,14 @@ export default function NegotiateArena() {
   return (
     <ArenaLayout
       title="The Negotiation"
-      subtitle="Hidden objectives. Bluff. Trade. Betray. Outthink in the shadows."
+      subtitle="Battle of strategy. Outthink, outbluff, outlast."
       color="#34d399"
       colorClass="text-emerald-400"
       bgClass="bg-emerald-500/10"
-      arenaNumber={3}
+      arenaNumber="Arena 3"
       state={state}
-      onStart={startGame}
+      onSelectCharacter={selectCharacter}
+      onUseAbility={useAbility}
       onReset={resetGame}
     >
       {state.aiResponse && state.status !== "loading" && (
@@ -65,7 +68,9 @@ export default function NegotiateArena() {
           {state.roundResult && (
             <div className="mt-3 pt-3 border-t border-white/[0.06]">
               <span className={`text-sm font-medium ${
-                state.roundResult === "Correct!" ? "text-emerald-400" : "text-orange-400"
+                state.roundResult.includes("damage") && !state.roundResult.includes("Wrong") && !state.roundResult.includes("MiMo deals")
+                  ? "text-emerald-400"
+                  : "text-orange-400"
               }`}>
                 {state.roundResult}
               </span>
@@ -76,26 +81,28 @@ export default function NegotiateArena() {
 
       <AIThinking content={state.aiThinking} isStreaming={state.status === "loading"} label="MiMo is calculating strategy" />
 
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <p className="text-xs text-zinc-500">Make your move: offer, counter-offer, accept, bluff, or call their bluff.</p>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Your negotiation move..."
-            disabled={state.status === "loading"}
-            className="flex-1 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700 disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || state.status === "loading"}
-            className="px-4 py-3 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors disabled:opacity-50"
-          >
-            <Send size={16} />
-          </button>
-        </div>
-      </form>
+      {state.status === "playing" && (
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <p className="text-xs text-zinc-500">Make your move: offer, counter-offer, accept, bluff, or call their bluff.</p>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Your negotiation move..."
+              className="flex-1 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-zinc-700"
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={!input.trim()}
+              className="px-4 py-3 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors disabled:opacity-50"
+            >
+              <Send size={16} />
+            </button>
+          </div>
+        </form>
+      )}
     </ArenaLayout>
   );
 }

@@ -59,7 +59,7 @@ const INITIAL_BATTLE: BattleState = {
 
 export function useGameEngine(systemPrompt: string, maxRounds: number = 7) {
   const [state, setState] = useState<GameState>({
-    status: "idle",
+    status: "character-select",
     score: 0,
     round: 0,
     maxRounds,

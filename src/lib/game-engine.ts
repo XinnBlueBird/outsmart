@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { streamChat, ChatMessage } from "@/lib/mimo-client";
+import { stripThinking } from "@/lib/utils";
 
 export type GameStatus = "idle" | "playing" | "won" | "lost" | "loading";
 
@@ -35,7 +36,7 @@ export function useGameEngine(systemPrompt: string, maxRounds: number = 5) {
   const abortRef = useRef<AbortController | null>(null);
 
   const startGame = useCallback(() => {
-    const newState = {
+    setState({
       status: "loading" as const,
       score: 0,
       round: 1,
@@ -46,10 +47,8 @@ export function useGameEngine(systemPrompt: string, maxRounds: number = 5) {
       humanInput: "",
       roundResult: null,
       difficulty: 1,
-    };
-    setState(newState);
+    });
 
-    // Auto-fetch first puzzle from MiMo
     (async () => {
       const roundInfo = `Round 1/${maxRounds}. Difficulty level: 1. Current score: 0.`;
       const fullSystem = `${systemPrompt}\n\n${roundInfo}`;
@@ -59,12 +58,13 @@ export function useGameEngine(systemPrompt: string, maxRounds: number = 5) {
           fullResponse += chunk;
           setState((s) => ({ ...s, aiThinking: fullResponse }));
         }
+        const cleaned = stripThinking(fullResponse);
         setState((s) => ({
           ...s,
           status: "playing",
           messages: [{ role: "assistant", content: fullResponse }],
           aiThinking: "",
-          aiResponse: fullResponse,
+          aiResponse: cleaned,
         }));
       } catch (e) {
         setState((s) => ({
@@ -106,6 +106,8 @@ export function useGameEngine(systemPrompt: string, maxRounds: number = 5) {
           resultText = fullResponse.replace(/\[SCORE:\s*\d+\]/i, "").trim();
         }
 
+        resultText = stripThinking(resultText);
+
         const isWin = roundScore > 0 || fullResponse.toLowerCase().includes("[win]");
         const isLoss = fullResponse.toLowerCase().includes("[lose]");
 
@@ -118,7 +120,7 @@ export function useGameEngine(systemPrompt: string, maxRounds: number = 5) {
           status: gameOver ? (newScore > s.maxRounds * 3 ? "won" : "lost") : "playing",
           score: newScore,
           round: newRound,
-          messages: [...newMessages, { role: "assistant", content: resultText }],
+          messages: [...newMessages, { role: "assistant", content: fullResponse }],
           aiThinking: "",
           aiResponse: resultText,
           roundResult: isWin ? "Correct!" : isLoss ? "You've been outsmarted." : "Round complete.",

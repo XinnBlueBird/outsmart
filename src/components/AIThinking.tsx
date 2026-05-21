@@ -1,5 +1,18 @@
 "use client";
 
+function cleanMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/_(.*?)_/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/`{3}[\s\S]*?`{3}/g, (m) => m.replace(/`{3}\w*\n?/g, "").trim())
+    .replace(/`(.*?)`/g, "$1")
+    .replace(/\[SCORE:\s*\d+\]/gi, "")
+    .replace(/\[(WIN|LOSE)\]/gi, "");
+}
+
 interface AIThinkingProps {
   content: string;
   isStreaming: boolean;
@@ -8,6 +21,8 @@ interface AIThinkingProps {
 
 export default function AIThinking({ content, isStreaming, label = "MiMo is reasoning" }: AIThinkingProps) {
   if (!content && !isStreaming) return null;
+
+  const cleaned = cleanMarkdown(content);
 
   return (
     <div className="thinking-bubble rounded-xl p-5 mb-6">
@@ -20,8 +35,8 @@ export default function AIThinking({ content, isStreaming, label = "MiMo is reas
         <span className="text-xs text-violet-300/80 font-medium">{label}</span>
         {isStreaming && <span className="text-xs text-zinc-500 ml-auto">streaming...</span>}
       </div>
-      <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap font-mono">
-        {content}
+      <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+        {cleaned}
         {isStreaming && <span className="inline-block w-2 h-4 bg-violet-400 ml-0.5 animate-pulse" />}
       </div>
     </div>

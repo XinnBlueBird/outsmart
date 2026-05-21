@@ -1,0 +1,17 @@
+OUTSMART: The MiMo Gauntlet. A human versus A.I. intelligence arena, powered by MiMo version 2.5 Pro.
+
+Choose from four unique character classes. The Cipher Mage, raw intellect. The Shadow Agent, fast and elusive. The Iron Mind, unbreakable defense. Or the Trickster, master of deception.
+
+Each class has unique stats, hit points, and special abilities that change how you play.
+
+Enter the Cipher Vault and solve puzzles to deal damage. Crack the code, and your character attacks. Get it wrong, and MiMo strikes back.
+
+The Interrogation tests your perception. Three suspects, one is secretly an A.I. Ask questions, read between the lines, and identify the impostor before your hit points run out.
+
+The Negotiation is about strategy and bluffing. Hidden objectives, resource trades, and betrayals. Outthink MiMo or get outplayed.
+
+And the Final Duel? Everything goes. MiMo adapts to your playstyle. No patterns. No mercy. Only survival.
+
+Watch MiMo's reasoning chain stream live as it tries to outthink you. Every decision is transparent. Score points, build combos, and use your special abilities to turn the tide.
+
+Can you outsmart the machine? Enter the gauntlet at outsmart dot hazel dot vercel dot app.

@@ -35,8 +35,8 @@ export function useGameEngine(systemPrompt: string, maxRounds: number = 5) {
   const abortRef = useRef<AbortController | null>(null);
 
   const startGame = useCallback(() => {
-    setState({
-      status: "playing",
+    const newState = {
+      status: "loading" as const,
       score: 0,
       round: 1,
       maxRounds,
@@ -46,8 +46,36 @@ export function useGameEngine(systemPrompt: string, maxRounds: number = 5) {
       humanInput: "",
       roundResult: null,
       difficulty: 1,
-    });
-  }, [maxRounds]);
+    };
+    setState(newState);
+
+    // Auto-fetch first puzzle from MiMo
+    (async () => {
+      const roundInfo = `Round 1/${maxRounds}. Difficulty level: 1. Current score: 0.`;
+      const fullSystem = `${systemPrompt}\n\n${roundInfo}`;
+      let fullResponse = "";
+      try {
+        for await (const chunk of streamChat([], fullSystem)) {
+          fullResponse += chunk;
+          setState((s) => ({ ...s, aiThinking: fullResponse }));
+        }
+        setState((s) => ({
+          ...s,
+          status: "playing",
+          messages: [{ role: "assistant", content: fullResponse }],
+          aiThinking: "",
+          aiResponse: fullResponse,
+        }));
+      } catch (e) {
+        setState((s) => ({
+          ...s,
+          status: "playing",
+          aiThinking: "",
+          aiResponse: `Error loading puzzle: ${e instanceof Error ? e.message : "Unknown error"}`,
+        }));
+      }
+    })();
+  }, [maxRounds, systemPrompt]);
 
   const sendMove = useCallback(
     async (input: string) => {
